@@ -17,7 +17,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-// Mock data
+// Mock data with undeployed funds
 const MOCK_INVESTOR_DETAILS = {
   totalInvested: 75000,
   currentValue: 82500,
@@ -25,6 +25,7 @@ const MOCK_INVESTOR_DETAILS = {
   lastDeposit: Date.now() - 7 * 24 * 60 * 60 * 1000, // 7 days ago
   badgeLevel: 2, // 0: Bronze, 1: Silver, 2: Gold, 3: Diamond
   investments: {
+    undeployed: { amount: 0, currentValue: 0, change: 0 },
     crypto: { amount: 25000, currentValue: 28000, change: 12 },
     stocks: { amount: 30000, currentValue: 31500, change: 5 },
     realEstate: { amount: 20000, currentValue: 23000, change: 15 },
@@ -33,6 +34,7 @@ const MOCK_INVESTOR_DETAILS = {
     month: new Date(Date.now() - (5 - i) * 30 * 24 * 60 * 60 * 1000).toLocaleString('default', { month: 'short' }),
     value: 75000 + Math.random() * 10000,
   })),
+  transactions: [],
 };
 
 export default function Dashboard() {
@@ -40,7 +42,7 @@ export default function Dashboard() {
   const [showAlert, setShowAlert] = useState(false);
   const [loading, setLoading] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
-  const [investorDetails] = useState(MOCK_INVESTOR_DETAILS);
+  const [investorDetails, setInvestorDetails] = useState(MOCK_INVESTOR_DETAILS);
 
   const handleSuccess = () => {
     setShowAlert(true);
@@ -64,7 +66,39 @@ export default function Dashboard() {
   const deposit = async () => {
     if (!depositAmount) return;
     setLoading(true);
-    // TODO: Implement actual deposit functionality
+    
+    // Mock deposit logic
+    const amount = parseFloat(depositAmount);
+    const newTransaction = {
+      type: 'Deposit',
+      amount,
+      timestamp: new Date().toISOString(),
+      status: 'Completed'
+    };
+
+    setInvestorDetails(prev => ({
+      ...prev,
+      totalInvested: prev.totalInvested + amount,
+      currentValue: prev.currentValue + amount,
+      investments: {
+        ...prev.investments,
+        undeployed: {
+          ...prev.investments.undeployed,
+          amount: prev.investments.undeployed.amount + amount,
+          currentValue: prev.investments.undeployed.currentValue + amount,
+          change: 0
+        }
+      },
+      history: [
+        ...prev.history,
+        {
+          month: new Date().toLocaleString('default', { month: 'short' }),
+          value: prev.currentValue + amount
+        }
+      ],
+      transactions: [newTransaction, ...prev.transactions]
+    }));
+
     setTimeout(() => {
       handleSuccess();
       setDepositAmount('');
@@ -182,7 +216,7 @@ export default function Dashboard() {
             </div>
 
             {/* Investment Categories */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {Object.entries(investorDetails.investments).map(([category, data]) => (
                 <Card key={category} className="bg-gray-800/50 border-none">
                   <CardHeader>
@@ -230,6 +264,31 @@ export default function Dashboard() {
                 )}
               </Button>
             </div>
+
+            {/* Transaction History */}
+            <Card className="bg-gray-800/50 border-none">
+              <CardHeader>
+                <CardTitle>Transaction History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {investorDetails.transactions.map((tx, index) => (
+                    <div key={index} className="flex justify-between items-center border-b border-gray-700 pb-2">
+                      <div>
+                        <p className="font-medium">{tx.type}</p>
+                        <p className="text-sm text-gray-400">
+                          {new Date(tx.timestamp).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium">${tx.amount.toLocaleString()}</p>
+                        <p className="text-sm text-green-400">{tx.status}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </CardContent>
         </Card>
       </div>
