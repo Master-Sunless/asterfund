@@ -16,6 +16,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { useNavigate } from 'react-router-dom';
 
 // Mock data with undeployed funds
 const MOCK_INVESTOR_DETAILS = {
@@ -43,6 +44,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
   const [investorDetails, setInvestorDetails] = useState(MOCK_INVESTOR_DETAILS);
+  const navigate = useNavigate();
 
   const handleSuccess = () => {
     setShowAlert(true);
@@ -142,6 +144,15 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
+        <div className="flex justify-end">
+          <Button
+            onClick={() => navigate('/manage-funds')}
+            className="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600"
+          >
+            Manage Funds
+          </Button>
+        </div>
+        
         <AnimatePresence>
           {showAlert && (
             <motion.div
