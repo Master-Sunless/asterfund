@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowUp, ArrowDown } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useInvestmentStore } from '@/store/investmentStore';
 import confetti from 'canvas-confetti';
 
 export function FundsForm() {
@@ -11,6 +12,7 @@ export function FundsForm() {
   const [amount, setAmount] = useState('');
   const [operation, setOperation] = useState<'deposit' | 'withdraw'>('deposit');
   const { toast } = useToast();
+  const { addTransaction, updateInvestments, updateBadgeLevel, walletAddress } = useInvestmentStore();
 
   const handleSuccess = (message: string) => {
     toast({
@@ -25,15 +27,13 @@ export function FundsForm() {
   };
 
   const handleTransaction = async () => {
-    if (!amount) return;
+    if (!amount || !walletAddress) return;
     setLoading(true);
     
-    // Mock transaction processing
     const parsedAmount = parseFloat(amount);
     
     if (operation === 'withdraw') {
       // TODO: Integrate with Aptos smart contract for withdrawal
-      // Check if enough time has passed since last deposit
       const lastDepositTime = localStorage.getItem('lastDepositTime');
       const mockWithdrawalDelay = 5 * 60 * 1000; // 5 minutes in milliseconds
       
@@ -46,9 +46,28 @@ export function FundsForm() {
         setLoading(false);
         return;
       }
+
+      // TODO: Verify sufficient balance in smart contract
+      addTransaction({
+        type: 'withdrawal',
+        amount: parsedAmount,
+        timestamp: new Date().toISOString(),
+        status: 'Completed',
+        address: walletAddress
+      });
+      updateInvestments('undeployed', -parsedAmount);
     } else {
       // TODO: Integrate with Aptos smart contract for deposit
       localStorage.setItem('lastDepositTime', Date.now().toString());
+      addTransaction({
+        type: 'deposit',
+        amount: parsedAmount,
+        timestamp: new Date().toISOString(),
+        status: 'Completed',
+        address: walletAddress
+      });
+      updateInvestments('undeployed', parsedAmount);
+      updateBadgeLevel();
     }
 
     setTimeout(() => {
@@ -70,6 +89,7 @@ export function FundsForm() {
             onClick={() => setOperation('deposit')}
             className="flex-1"
           >
+            <ArrowUp className="mr-2 h-4 w-4" />
             Deposit
           </Button>
           <Button
@@ -77,6 +97,7 @@ export function FundsForm() {
             onClick={() => setOperation('withdraw')}
             className="flex-1"
           >
+            <ArrowDown className="mr-2 h-4 w-4" />
             Withdraw
           </Button>
         </div>
@@ -97,7 +118,7 @@ export function FundsForm() {
           )}
           <Button 
             onClick={handleTransaction} 
-            disabled={loading || !amount}
+            disabled={loading || !amount || !walletAddress}
             className="w-full bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600"
           >
             {loading ? (
