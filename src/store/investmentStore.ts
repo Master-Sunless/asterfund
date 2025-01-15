@@ -39,12 +39,21 @@ export const useInvestmentStore = create<InvestmentState>((set) => ({
   },
   transactions: [],
   setWalletAddress: (address) => set({ walletAddress: address }),
-  addTransaction: (transaction) => set((state) => ({
-    transactions: [transaction, ...state.transactions],
-    totalInvested: transaction.type === 'deposit' 
+  addTransaction: (transaction) => set((state) => {
+    const newTotalInvested = transaction.type === 'deposit' 
       ? state.totalInvested + transaction.amount 
-      : state.totalInvested - transaction.amount
-  })),
+      : state.totalInvested - transaction.amount;
+    
+    const newCurrentValue = transaction.type === 'deposit'
+      ? state.currentValue + transaction.amount
+      : state.currentValue - transaction.amount;
+
+    return {
+      transactions: [transaction, ...state.transactions],
+      totalInvested: newTotalInvested,
+      currentValue: newCurrentValue
+    };
+  }),
   updateInvestments: (category, amount) => set((state) => ({
     investments: {
       ...state.investments,
@@ -52,6 +61,8 @@ export const useInvestmentStore = create<InvestmentState>((set) => ({
         ...state.investments[category],
         amount: state.investments[category].amount + amount,
         currentValue: state.investments[category].currentValue + amount,
+        change: ((state.investments[category].currentValue + amount) / 
+                (state.investments[category].amount + amount) - 1) * 100
       }
     }
   })),

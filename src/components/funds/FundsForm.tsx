@@ -87,7 +87,7 @@ export function FundsForm() {
           <Button
             variant={operation === 'deposit' ? 'default' : 'outline'}
             onClick={() => setOperation('deposit')}
-            className="flex-1"
+            className="flex-1 bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600"
           >
             <ArrowUp className="mr-2 h-4 w-4" />
             Deposit

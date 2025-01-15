@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -51,14 +50,14 @@ export default function Dashboard() {
 
   if (!walletAddress) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
         <WalletStatus />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         <div className="flex justify-between items-center">
           <Button
@@ -70,7 +69,7 @@ export default function Dashboard() {
           <WalletStatus />
         </div>
 
-        <Card className="backdrop-blur-sm bg-white/10 border-none">
+        <Card className="backdrop-blur-sm bg-white/80 border shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -93,25 +92,25 @@ export default function Dashboard() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-gray-400">Total Invested</p>
+                <p className="text-gray-600">Total Invested</p>
                 <p className="text-2xl font-bold">${totalInvested.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-gray-400">Current Value</p>
+                <p className="text-gray-600">Current Value</p>
                 <p className="text-2xl font-bold">${currentValue.toLocaleString()}</p>
               </div>
             </div>
 
-            <div className="h-64">
+            <div className="h-96">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis dataKey="month" stroke="#9CA3AF" />
-                  <YAxis stroke="#9CA3AF" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis dataKey="month" stroke="#6B7280" />
+                  <YAxis stroke="#6B7280" />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#1F2937',
-                      border: '1px solid #374151',
+                      backgroundColor: 'white',
+                      border: '1px solid #E5E7EB',
                     }}
                   />
                   <Line 
@@ -127,18 +126,18 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {Object.entries(investments).map(([category, data]) => (
-                <Card key={category} className="bg-gray-800/50 border-none">
+                <Card key={category} className="bg-white shadow-sm border">
                   <CardHeader>
                     <CardTitle className="text-sm capitalize">{category}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Current</span>
+                        <span className="text-gray-600">Current</span>
                         <span>${data.currentValue.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-400">Change</span>
+                        <span className="text-gray-600">Change</span>
                         <div className="flex items-center gap-1">
                           {data.change >= 0 ? (
                             <TrendingUp className="h-4 w-4 text-green-400" />
@@ -155,30 +154,6 @@ export default function Dashboard() {
                 </Card>
               ))}
             </div>
-
-            <Card className="bg-gray-800/50 border-none">
-              <CardHeader>
-                <CardTitle>Transaction History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {transactions.map((tx, index) => (
-                    <div key={index} className="flex justify-between items-center border-b border-gray-700 pb-2">
-                      <div>
-                        <p className="font-medium capitalize">{tx.type}</p>
-                        <p className="text-sm text-gray-400">
-                          {new Date(tx.timestamp).toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">${tx.amount.toLocaleString()}</p>
-                        <p className="text-sm text-green-400">{tx.status}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
           </CardContent>
         </Card>
       </div>
